@@ -1,4 +1,4 @@
-# CRM Project
+# EDU-CRM
 
 A robust Customer Relationship Management (CRM) system developed using Django.
 
