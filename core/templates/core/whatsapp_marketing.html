@@ -1,0 +1,322 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="whatsapp-marketing-container">
+    <div class="whatsapp-marketing-header">
+        <h1>WhatsApp Marketing</h1>
+        <p class="text-muted">Send personalized WhatsApp messages to your contacts</p>
+    </div>
+
+    <div class="whatsapp-form-container">
+        <form method="post" enctype="multipart/form-data" id="whatsappForm">
+            {% csrf_token %}
+            
+            <div class="form-grid">
+                <div class="form-left-panel">
+                    <div class="form-group message-group">
+                        <label for="message">Message</label>
+                        <div class="editor-toolbar">
+                            <button type="button" class="toolbar-btn" title="Add Emoji">😊</button>
+                            <button type="button" class="toolbar-btn" title="Add Template">📋</button>
+                            <button type="button" class="toolbar-btn" title="Preview">👁️</button>
+                        </div>
+                        <div class="editor-container">
+                            <div id="editor" class="form-control whatsapp-editor"></div>
+                            <textarea name="message" id="message" style="display: none;"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="media">Attach Media</label>
+                        <div class="media-upload-container">
+                            <input type="file" id="media" name="media" accept="image/*,video/*" class="file-input">
+                            <div class="upload-placeholder" id="uploadPlaceholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Drag and drop media or click to browse</span>
+                                <small class="text-muted d-block">Supports images and videos</small>
+                            </div>
+                            <div class="media-preview" id="mediaPreview" style="display: none;">
+                                <img id="previewImg" src="" alt="Preview">
+                                <button type="button" class="remove-media" id="removeMedia">&times;</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-right-panel">
+                    <div class="form-group recipients-group">
+                        <label>Recipients</label>
+                        <div class="recipients-container">
+                            <div class="recipients-header">
+                                <span>Select contacts:</span>
+                                <div class="recipient-actions">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="selectAll">Select All</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="clearAll">Clear All</button>
+                                </div>
+                                <div class="search-box">
+                                    <input type="text" class="form-control form-control-sm" placeholder="Search contacts...">
+                                </div>
+                            </div>
+                            <div class="recipients-list">
+                                {% for contact in contacts %}
+                                <div class="recipient-item">
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" name="recipients" value="{{ contact.id }}">
+                                        <span class="checkmark"></span>
+                                        <div class="recipient-info">
+                                            <span class="recipient-name">{{ contact.name }}</span>
+                                            <span class="recipient-phone">{{ contact.phone }}</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline-secondary" id="saveAsDraft">Save as Draft</button>
+                <button type="submit" class="btn btn-success">
+                    <i class="fab fa-whatsapp"></i> Send Message
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.whatsapp-marketing-container {
+    height: calc(100vh - 60px);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    background: #f8f9fa;
+}
+
+.whatsapp-marketing-header {
+    margin-bottom: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.editor-toolbar {
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    padding: 8px;
+}
+
+.toolbar-btn {
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.toolbar-btn:hover {
+    background: #f8f9fa;
+}
+
+.whatsapp-editor {
+    min-height: 200px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.media-upload-container {
+    border: 2px dashed #ced4da;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+}
+
+.upload-placeholder {
+    color: #6c757d;
+}
+
+.upload-placeholder i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.recipients-container {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.recipients-header {
+    background: #f8f9fa;
+    padding: 12px;
+    border-bottom: 1px solid #ced4da;
+}
+
+.recipient-actions {
+    margin: 8px 0;
+}
+
+.search-box {
+    margin-top: 8px;
+}
+
+.recipients-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.recipient-item {
+    padding: 8px;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.recipient-item:last-child {
+    border-bottom: none;
+}
+
+.recipient-info {
+    display: inline-block;
+    margin-left: 8px;
+}
+
+.recipient-name {
+    display: block;
+    font-weight: 500;
+}
+
+.recipient-phone {
+    display: block;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 1px solid #ced4da;
+}
+
+.btn-success {
+    background-color: #25D366;
+    border-color: #25D366;
+}
+
+.btn-success:hover {
+    background-color: #128C7E;
+    border-color: #128C7E;
+}
+</style>
+{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Quill editor
+    var quill = new Quill('#editor', {
+        theme: 'snow',
+        placeholder: 'Type your message here...',
+        modules: {
+            toolbar: false
+        }
+    });
+
+    // Handle form submission
+    var form = document.getElementById('whatsappForm');
+    form.onsubmit = function() {
+        var messageInput = document.querySelector('input[name=message]');
+        messageInput.value = quill.root.innerHTML;
+    };
+
+    // Handle media upload preview
+    const mediaInput = document.getElementById('media');
+    const mediaPreview = document.getElementById('mediaPreview');
+    const previewImg = document.getElementById('previewImg');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const removeMedia = document.getElementById('removeMedia');
+
+    mediaInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                mediaPreview.style.display = 'block';
+                uploadPlaceholder.style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    removeMedia.addEventListener('click', function() {
+        mediaInput.value = '';
+        mediaPreview.style.display = 'none';
+        uploadPlaceholder.style.display = 'block';
+    });
+
+    // Handle recipient selection
+    const selectAllBtn = document.getElementById('selectAll');
+    const clearAllBtn = document.getElementById('clearAll');
+    const recipientCheckboxes = document.querySelectorAll('input[name="recipients"]');
+
+    selectAllBtn.addEventListener('click', function() {
+        recipientCheckboxes.forEach(checkbox => checkbox.checked = true);
+    });
+
+    clearAllBtn.addEventListener('click', function() {
+        recipientCheckboxes.forEach(checkbox => checkbox.checked = false);
+    });
+
+    // Handle recipient search
+    const searchInput = document.querySelector('.search-box input');
+    const recipientItems = document.querySelectorAll('.recipient-item');
+
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        recipientItems.forEach(item => {
+            const name = item.querySelector('.recipient-name').textContent.toLowerCase();
+            const phone = item.querySelector('.recipient-phone').textContent.toLowerCase();
+            if (name.includes(searchTerm) || phone.includes(searchTerm)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,87 @@
+/* Container for the dashboard */
+.dashboard-container {
+    padding: 2rem;
+    background-color: #f8f9fa; /* Light gray background */
+}
+
+/* Flexbox grid for the stats */
+.stats-grid {
+    display: flex; /* Use flexbox for alignment */
+    justify-content: space-between; /* Even spacing between boxes */
+    align-items: stretch; /* Align items to stretch to the same height */
+    gap: 1rem; /* Spacing between the cards */
+    margin-bottom: 2rem;
+    flex-wrap: wrap; /* Wrap items to the next line on smaller screens */
+}
+
+/* Style for individual cards */
+.stat-card {
+    background: white; /* White background for the cards */
+    border-radius: 8px; /* Rounded corners */
+    padding: 1.5rem; /* Padding inside each card */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    border: 1px solid rgba(0, 0, 0, 0.05); /* Light border */
+    flex: 1; /* Make all cards take equal width */
+    max-width: calc(33.33% - 1rem); /* Equal width for 3 cards with spacing */
+    text-align: center; /* Center-align text and icons */
+    transition: all 0.3s ease-in-out; /* Smooth transition for hover effect */
+}
+
+/* Hover effect for cards */
+.stat-card:hover {
+    transform: translateY(-2px); /* Slight lift on hover */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* Highlighted shadow */
+}
+
+/* Content inside the cards */
+.stat-content {
+    display: flex;
+    flex-direction: column; /* Arrange content vertically */
+    align-items: center; /* Center-align content */
+    text-align: center; /* Center-align text */
+}
+
+/* Title of the stat */
+.stat-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333; /* Dark gray color */
+    margin-bottom: 0.5rem;
+}
+
+/* Stat icon styling */
+.stat-icon {
+    font-size: 2rem;
+    color: #007bff; /* Blue color */
+    margin-bottom: 0.5rem;
+}
+
+/* Stat value styling */
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333; /* Dark gray */
+    margin-bottom: 0.5rem;
+}
+
+/* Comparison text */
+.stat-comparison {
+    font-size: 0.875rem;
+    color: #888; /* Light gray for subtle contrast */
+}
+
+/* Responsive Design */
+
+/* Medium screens: Two cards per row */
+@media (max-width: 992px) {
+    .stat-card {
+        max-width: calc(50% - 1rem); /* Two cards per row */
+    }
+}
+
+/* Small screens: One card per row */
+@media (max-width: 768px) {
+    .stat-card {
+        max-width: 100%; /* Single card per row */
+    }
+}

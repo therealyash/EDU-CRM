@@ -1,0 +1,252 @@
+.email-marketing-container {
+    height: calc(100vh - 60px); /* Adjust based on your navbar height */
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    background: #f8f9fa;
+}
+
+.email-marketing-header {
+    margin-bottom: 20px;
+}
+
+.email-marketing-header h1 {
+    font-size: 24px;
+    color: #333;
+    margin: 0;
+}
+
+.email-form-container {
+    flex: 1;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+    
+    display: flex;
+    flex-direction: column;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.form-left-panel, .form-right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow: hidden;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.message-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.editor-container {
+    flex: 1;
+    overflow: hidden;
+}
+
+#editor {
+    height: 100%;
+    min-height: 200px;
+    overflow-y: auto;
+}
+
+.recipients-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.recipients-container {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.recipients-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 0 5px;
+}
+
+.recipient-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.recipients-list {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+.recipient-item {
+    padding: 6px 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.recipient-item:last-child {
+    border-bottom: none;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    cursor: pointer;
+}
+
+.recipient-info {
+    margin-left: 10px;
+}
+
+.recipient-name {
+    font-weight: 500;
+    margin-right: 8px;
+    font-size: 13px;
+}
+
+.recipient-email {
+    color: #666;
+    font-size: 12px;
+}
+
+.editor-toolbar {
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    padding: 5px;
+    background: #f8f9fa;
+}
+
+.toolbar-btn {
+    padding: 3px 6px;
+    margin-right: 3px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.image-upload-container {
+    border: 2px dashed #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    text-align: center;
+    position: relative;
+}
+
+.file-input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-placeholder {
+    color: #666;
+    font-size: 13px;
+}
+
+.image-preview {
+    position: relative;
+    max-width: 200px;
+    margin: 0 auto;
+}
+
+.image-preview img {
+    max-width: 100%;
+    border-radius: 4px;
+}
+
+.remove-image {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.btn-primary {
+    background: #0d6efd;
+    color: white;
+}
+
+.btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+    background: white;
+}
+
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+}

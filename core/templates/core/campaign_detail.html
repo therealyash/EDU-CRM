@@ -1,0 +1,773 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+{% csrf_token %}
+<div class="campaign-container">
+    <!-- Header Section -->
+    <div class="page-header">
+        <div class="header-left">
+            <div class="d-flex align-items-center gap-3">
+                <h1 class="campaign-title mb-0">{{ campaign.name }}</h1>
+                <span class="badge rounded-pill status-{{ campaign.status|lower }}">{{ campaign.status }}</span>
+            </div>
+            <div class="date-range text-muted mt-2">
+                <i class="bx bx-calendar"></i>
+                {{ campaign.start_date|date:"M d, Y" }} - {{ campaign.end_date|date:"M d, Y" }}
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-outline-primary">
+                <i class="bx bx-tag"></i> Add Tags
+            </button>
+            <a href="{% url 'core:campaign_update' campaign.id %}" class="btn btn-primary">
+                <i class="bx bx-edit"></i> Edit
+            </a>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link active" href="#overview">Overview</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#timeline">Timeline</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#analytics">Analytics</a>
+        </li>
+    </ul>
+
+    <!-- Stats Grid -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card h-100 stat-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Reach</h6>
+                    <h2 class="card-title mb-3" id="totalReachCount">{{ campaign.contacts.count|add:campaign.leads.count }}</h2>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <small class="text-muted d-block">Contacts</small>
+                            <strong id="contactsCount">{{ campaign.contacts.count }}</strong>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Leads</small>
+                            <strong id="leadsCount">{{ campaign.leads.count }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card h-100 stat-card" data-type="budget">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Budget Cost</h6>
+                    <h2 class="card-title mb-3">₹{{ campaign.budgeted_cost|default:"0.00" }}</h2>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ campaign.get_budget_percentage|floatformat:0 }}%"
+                             aria-valuenow="{{ campaign.get_budget_percentage|floatformat:0 }}"
+                             aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                    <small class="text-muted mt-2 d-block">{{ campaign.get_budget_percentage|floatformat:0 }}% of budget used</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card h-100 stat-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="avatar-sm bg-light rounded p-1 me-2">
+                            <i class="bx bx-dollar-circle fs-4 text-success"></i>
+                        </div>
+                        <h6 class="card-subtitle mb-0 text-muted">Expected Revenue</h6>
+                    </div>
+                    <h2 class="card-title mb-2">₹{{ campaign.expected_revenue|floatformat:2 }}</h2>
+                    <div class="progress mb-2" style="height: 6px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ campaign.get_revenue_percentage|floatformat:0 }}%"
+                             aria-valuenow="{{ campaign.get_revenue_percentage|floatformat:0 }}"
+                             aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted d-block">Generated</small>
+                            <strong class="text-success">₹{{ campaign.actual_revenue|floatformat:2 }}</strong>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Progress</small>
+                            <strong>{{ campaign.get_revenue_percentage|floatformat:0 }}%</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card h-100 stat-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Response Rate</h6>
+                    <h2 class="card-title mb-3">{{ campaign.response_rate|default:"0" }}%</h2>
+                    <div class="d-flex align-items-center">
+                        <i class="bx bx-target-lock me-1"></i>
+                        <small class="text-muted">Target: {{ campaign.expected_response }}%</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Campaign Information -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Campaign Information</h5>
+            <button class="btn btn-link">
+                <i class="bx bx-chevron-up"></i>
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Campaign Type</dt>
+                        <dd class="col-sm-8">{{ campaign.get_type_display }}</dd>
+
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8">{{ campaign.get_status_display }}</dd>
+
+                        <dt class="col-sm-4">Start Date</dt>
+                        <dd class="col-sm-8">{{ campaign.start_date|date:"M d, Y" }}</dd>
+
+                        <dt class="col-sm-4">End Date</dt>
+                        <dd class="col-sm-8">{{ campaign.end_date|date:"M d, Y" }}</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Expected Revenue</dt>
+                        <dd class="col-sm-8">₹{{ campaign.expected_revenue }}</dd>
+
+                        <dt class="col-sm-4">Budgeted Cost</dt>
+                        <dd class="col-sm-8">₹{{ campaign.budgeted_cost }}</dd>
+
+                        <dt class="col-sm-4">Actual Cost</dt>
+                        <dd class="col-sm-8">
+                            <div class="d-flex align-items-center actual-cost-container">
+                                <div class="actual-cost-display">
+                                    <span class="actual-cost-value">₹{{ campaign.actual_cost }}</span>
+                                    <button class="btn btn-link btn-sm p-0 ms-2 edit-actual-cost">
+                                        <i class="bx bx-pencil"></i>
+                                    </button>
+                                </div>
+                                <div class="actual-cost-edit d-none">
+                                    <div class="input-group input-group-sm" style="width: 200px;">
+                                        <span class="input-group-text">₹</span>
+                                        <input type="number" class="form-control form-control-sm actual-cost-input" 
+                                               value="{{ campaign.actual_cost }}" 
+                                               data-campaign-id="{{ campaign.id }}">
+                                        <button class="btn btn-success save-actual-cost" type="button">
+                                            <i class="bx bx-check"></i>
+                                        </button>
+                                        <button class="btn btn-danger cancel-actual-cost" type="button">
+                                            <i class="bx bx-x"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </dd>
+
+                        <dt class="col-sm-4">Expected Response</dt>
+                        <dd class="col-sm-8">{{ campaign.expected_response }}%</dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <h6 class="mb-2">Description</h6>
+                    <p class="text-muted">{{ campaign.description }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Opportunities -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Opportunities</h5>
+            <a href="{% url 'core:opportunity_list' campaign.id %}" class="btn btn-primary btn-sm">
+                <i class="bx bx-plus"></i> Add Opportunity
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Company</th>
+                            <th>Amount</th>
+                            <th>Probability</th>
+                            <th>Stage</th>
+                            <th>Close Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for opportunity in campaign.opportunities.all %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm bg-light rounded-circle me-2">
+                                        <i class="bx bx-briefcase text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ opportunity.name }}</h6>
+                                        <small class="text-muted">Created {{ opportunity.created_at|timesince }} ago</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ opportunity.company }}</td>
+                            <td>₹{{ opportunity.amount }}</td>
+                            <td>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar" role="progressbar" style="width: {{ opportunity.probability }}%;"
+                                        aria-valuenow="{{ opportunity.probability }}" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                                <small class="mt-1 d-block">{{ opportunity.probability }}%</small>
+                            </td>
+                            <td>
+                                {% if opportunity.stage == 'closed-won' %}
+                                <span class="badge bg-success">Closed Won</span>
+                                {% elif opportunity.stage == 'closed-lost' %}
+                                <span class="badge bg-danger">Closed Lost</span>
+                                {% else %}
+                                <span class="badge bg-primary">{{ opportunity.stage|title }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ opportunity.close_date|date:"M d, Y" }}</td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-icon" type="button" data-bs-toggle="dropdown">
+                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'core:opportunity_update' opportunity.id %}">
+                                                <i class="bx bx-edit me-2"></i>Edit
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'core:opportunity_delete' opportunity.id %}">
+                                                <i class="bx bx-trash me-2"></i>Delete
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="bx bx-briefcase display-4"></i>
+                                    <p class="mt-2">No opportunities found. Click the button above to add one.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Leads -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Leads</h5>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addLeadsModal">
+                        <i class="bx bx-plus"></i> Add Leads
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if campaign.leads.all %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lead in campaign.leads.all %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-light rounded-circle me-2">
+                                                <i class="bx bx-user text-primary"></i>
+                                            </div>
+                                            <div>{{ lead.name }}</div>
+                                        </div>
+                                    </td>
+                                    <td>{{ lead.email }}</td>
+                                    <td>{{ lead.phone }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-icon remove-lead" data-lead-id="{{ lead.id }}">
+                                            <i class="bx bx-x text-danger"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="bx bx-user-plus display-4"></i>
+                        <p class="mt-2">No leads found</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Contacts -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Contacts</h5>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addContactsModal">
+                        <i class="bx bx-plus"></i> Add Contacts
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if campaign.contacts.all %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contact in campaign.contacts.all %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-light rounded-circle me-2">
+                                                <i class="bx bx-user text-primary"></i>
+                                            </div>
+                                            <div>{{ contact.name }}</div>
+                                        </div>
+                                    </td>
+                                    <td>{{ contact.email }}</td>
+                                    <td>{{ contact.phone }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-icon remove-contact" data-contact-id="{{ contact.id }}">
+                                            <i class="bx bx-x text-danger"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="bx bx-user display-4"></i>
+                        <p class="mt-2">No contacts found</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Contacts Modal -->
+    <div class="modal fade" id="addContactsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Contacts to Campaign</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{% url 'core:add_campaign_contacts' campaign.id %}">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="contactSearch" placeholder="Search contacts...">
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="bx bx-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive" style="max-height: 400px;">
+                            <table class="table table-hover align-middle">
+                                <thead class="sticky-top bg-white">
+                                    <tr>
+                                        <th>
+                                            <input type="checkbox" class="form-check-input" id="selectAllContacts">
+                                        </th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for contact in all_contacts %}
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input contact-checkbox" 
+                                                   name="selected_contacts" value="{{ contact.id }}"
+                                                   {% if contact in campaign.contacts.all %}checked{% endif %}>
+                                        </td>
+                                        <td>{{ contact.name }}</td>
+                                        <td>{{ contact.email }}</td>
+                                        <td>{{ contact.phone }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Selected Contacts</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Leads Modal -->
+    <div class="modal fade" id="addLeadsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Leads to Campaign</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{% url 'core:add_campaign_leads' campaign.id %}">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="leadSearch" placeholder="Search contacts...">
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="bx bx-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive" style="max-height: 400px;">
+                            <table class="table table-hover align-middle">
+                                <thead class="sticky-top bg-white">
+                                    <tr>
+                                        <th>
+                                            <input type="checkbox" class="form-check-input" id="selectAllLeads">
+                                        </th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for contact in all_contacts %}
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input lead-checkbox" 
+                                                   name="selected_leads" value="{{ contact.id }}"
+                                                   {% if contact in campaign.leads.all %}checked{% endif %}>
+                                        </td>
+                                        <td>{{ contact.name }}</td>
+                                        <td>{{ contact.email }}</td>
+                                        <td>{{ contact.phone }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Selected Leads</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.campaign-container {
+    padding: 2rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.campaign-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.date-range {
+    font-size: 0.875rem;
+}
+
+.date-range i {
+    margin-right: 0.5rem;
+}
+
+.status-active {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-draft {
+    background-color: #6c757d;
+    color: white;
+}
+
+.status-paused {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.status-completed {
+    background-color: #007bff;
+    color: white;
+}
+
+.status-cancelled {
+    background-color: #dc3545;
+    color: white;
+}
+
+.stat-card {
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.nav-tabs {
+    border-bottom: 2px solid #dee2e6;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    padding: 0.75rem 1rem;
+    margin-right: 1rem;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.nav-tabs .nav-link.active {
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid #dee2e6;
+    padding: 1rem;
+}
+
+.btn-link {
+    color: #6c757d;
+    padding: 0;
+}
+
+.btn-link:hover {
+    color: #495057;
+}
+
+.progress {
+    border-radius: 0.25rem;
+}
+
+.progress-bar {
+    background-color: #007bff;
+}
+
+dt {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+dd {
+    margin-bottom: 0.5rem;
+}
+
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-sm i {
+    font-size: 1.25rem;
+}
+
+.dropdown-item i {
+    font-size: 1.1rem;
+}
+
+.display-4 {
+    font-size: 2.5rem;
+    color: #dee2e6;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle actual cost editing
+    const actualCostContainer = document.querySelector('.actual-cost-container');
+    if (actualCostContainer) {
+        const displayDiv = actualCostContainer.querySelector('.actual-cost-display');
+        const editDiv = actualCostContainer.querySelector('.actual-cost-edit');
+        const editButton = actualCostContainer.querySelector('.edit-actual-cost');
+        const saveButton = actualCostContainer.querySelector('.save-actual-cost');
+        const cancelButton = actualCostContainer.querySelector('.cancel-actual-cost');
+        const input = actualCostContainer.querySelector('.actual-cost-input');
+        const displayValue = actualCostContainer.querySelector('.actual-cost-value');
+
+        // Function to update all budget displays
+        function updateBudgetDisplays(newValue, budgetPercentage) {
+            // Update the info section display
+            displayValue.textContent = `₹${newValue}`;
+            
+            // Update the budget box display (specifically target the budget card)
+            const budgetCard = document.querySelector('.stat-card[data-type="budget"]');
+            if (budgetCard) {
+                const topBoxAmount = budgetCard.querySelector('.card-title');
+                const topBoxProgressBar = budgetCard.querySelector('.progress-bar');
+                const topBoxPercentageText = budgetCard.querySelector('.text-muted.mt-2');
+                
+                if (topBoxAmount) {
+                    topBoxAmount.textContent = `₹${newValue}`;
+                }
+                if (topBoxProgressBar) {
+                    topBoxProgressBar.style.width = `${budgetPercentage}%`;
+                    topBoxProgressBar.setAttribute('aria-valuenow', budgetPercentage);
+                }
+                if (topBoxPercentageText) {
+                    topBoxPercentageText.textContent = `${budgetPercentage}% of budget used`;
+                }
+            }
+        }
+
+        // Show edit form
+        editButton.addEventListener('click', function() {
+            displayDiv.classList.add('d-none');
+            editDiv.classList.remove('d-none');
+            input.focus();
+        });
+
+        // Cancel editing
+        cancelButton.addEventListener('click', function() {
+            displayDiv.classList.remove('d-none');
+            editDiv.classList.add('d-none');
+            input.value = displayValue.textContent.replace('₹', '').trim();
+        });
+
+        // Save changes
+        saveButton.addEventListener('click', async function() {
+            try {
+                const campaignId = input.dataset.campaignId;
+                const newValue = input.value;
+                console.log('Updating cost:', { campaignId, newValue });
+
+                const response = await fetch(`/api/campaigns/${campaignId}/update-cost/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({
+                        actual_cost: newValue
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Response:', data);
+
+                if (data.success) {
+                    // Update all displays
+                    updateBudgetDisplays(newValue, data.budget_percentage);
+                    
+                    // Switch back to display mode
+                    displayDiv.classList.remove('d-none');
+                    editDiv.classList.add('d-none');
+                } else {
+                    throw new Error(data.error || 'Update failed');
+                }
+            } catch (error) {
+                console.error('Error updating cost:', error);
+                alert('Failed to update actual cost. Please try again.');
+            }
+        });
+
+        // Handle Enter key
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                saveButton.click();
+            }
+        });
+
+        // Handle Escape key
+        input.addEventListener('keyup', function(e) {
+            if (e.key === 'Escape') {
+                cancelButton.click();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

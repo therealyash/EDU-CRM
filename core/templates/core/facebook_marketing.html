@@ -1,0 +1,397 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="facebook-marketing-container">
+    <div class="facebook-marketing-header">
+        <h1>Facebook Marketing</h1>
+        <p class="text-muted">Create and schedule Facebook posts</p>
+    </div>
+
+    <div class="facebook-form-container">
+        <form method="post" enctype="multipart/form-data" id="facebookForm">
+            {% csrf_token %}
+            
+            <div class="form-grid">
+                <div class="form-left-panel">
+                    <div class="post-preview">
+                        <div class="preview-header">
+                            <img src="{% static 'img/page-avatar.png' %}" alt="Page Avatar" class="page-avatar">
+                            <div class="page-info">
+                                <span class="page-name">Your Page Name</span>
+                                <span class="post-visibility">
+                                    <i class="fas fa-globe"></i> Public
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="form-group message-group">
+                            <div class="editor-container">
+                                <div id="editor"></div>
+                                <input type="hidden" name="postContent" id="postContent">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="media-upload-container">
+                                <input type="file" id="media" name="media" accept="image/*,video/*" class="file-input" multiple>
+                                <div class="upload-placeholder" id="uploadPlaceholder">
+                                    <i class="fas fa-images"></i>
+                                    <span>Add Photos/Videos</span>
+                                    <small class="text-muted d-block">or drag and drop</small>
+                                </div>
+                                <div class="media-preview-grid" id="mediaPreview" style="display: none;">
+                                    <!-- Preview images will be inserted here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-right-panel">
+                    <div class="post-settings">
+                        <h5>Post Settings</h5>
+                        
+                        <div class="setting-group">
+                            <label>When to Post</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="postTime" id="postNow" checked>
+                                <label class="btn btn-outline-primary" for="postNow">Post Now</label>
+
+                                <input type="radio" class="btn-check" name="postTime" id="schedule">
+                                <label class="btn btn-outline-primary" for="schedule">Schedule</label>
+                            </div>
+                            
+                            <div id="scheduleOptions" class="mt-3" style="display: none;">
+                                <input type="datetime-local" class="form-control" name="scheduleTime">
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>Post Type</label>
+                            <select class="form-select" name="postType">
+                                <option value="regular">Regular Post</option>
+                                <option value="offer">Special Offer</option>
+                                <option value="event">Event</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>Target Audience</label>
+                            <div class="audience-tags">
+                                <span class="audience-tag">
+                                    <i class="fas fa-users"></i> Followers
+                                    <button type="button" class="remove-tag">&times;</button>
+                                </span>
+                                <button type="button" class="btn btn-sm btn-outline-primary add-audience">
+                                    <i class="fas fa-plus"></i> Add Audience
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline-secondary" id="saveAsDraft">Save as Draft</button>
+                <button type="submit" class="btn btn-facebook">
+                    <i class="fab fa-facebook"></i> Post to Facebook
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.facebook-marketing-container {
+    height: calc(100vh - 60px);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    background: #f8f9fa;
+}
+
+.facebook-marketing-header {
+    margin-bottom: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.post-preview {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 16px;
+}
+
+.preview-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.page-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.page-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.page-name {
+    font-weight: 600;
+    color: #1877f2;
+}
+
+.post-visibility {
+    font-size: 0.875rem;
+    color: #65676b;
+}
+
+.editor-container {
+    margin-bottom: 20px;
+}
+
+#editor {
+    min-height: 150px;
+    background: white;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.ql-toolbar {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    background: #fff;
+}
+
+.ql-container {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    background: #fff;
+}
+
+.media-upload-container {
+    border: 2px dashed #ced4da;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    margin-top: 16px;
+}
+
+.upload-placeholder {
+    color: #6c757d;
+}
+
+.upload-placeholder i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.media-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.media-preview-item {
+    position: relative;
+    aspect-ratio: 1;
+}
+
+.media-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.remove-media {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.post-settings {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 16px;
+}
+
+.setting-group {
+    margin-bottom: 20px;
+}
+
+.setting-group:last-child {
+    margin-bottom: 0;
+}
+
+.audience-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.audience-tag {
+    background: #e4e6eb;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.remove-tag {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 1.2rem;
+    line-height: 1;
+    color: #65676b;
+    cursor: pointer;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 1px solid #ced4da;
+}
+
+.btn-facebook {
+    background-color: #1877f2;
+    border-color: #1877f2;
+    color: white;
+}
+
+.btn-facebook:hover {
+    background-color: #166fe5;
+    border-color: #166fe5;
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Quill editor
+    var quill = new Quill('#editor', {
+        theme: 'snow',
+        placeholder: "What's on your mind?",
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'],
+                ['link', 'blockquote'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['clean']
+            ]
+        }
+    });
+
+    // Handle form submission
+    var form = document.getElementById('facebookForm');
+    form.onsubmit = function(e) {
+        e.preventDefault();
+        var postContentInput = document.getElementById('postContent');
+        postContentInput.value = quill.root.innerHTML;
+        form.submit();
+    };
+
+    // Handle media upload preview
+    const mediaInput = document.getElementById('media');
+    const mediaPreview = document.getElementById('mediaPreview');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+
+    mediaInput.addEventListener('change', function(e) {
+        const files = e.target.files;
+        if (files.length > 0) {
+            mediaPreview.innerHTML = '';
+            uploadPlaceholder.style.display = 'none';
+            mediaPreview.style.display = 'grid';
+
+            Array.from(files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'media-preview-item';
+                    previewItem.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview ${index + 1}">
+                        <button type="button" class="remove-media" data-index="${index}">&times;</button>
+                    `;
+                    mediaPreview.appendChild(previewItem);
+                }
+                reader.readAsDataURL(file);
+            });
+        }
+    });
+
+    mediaPreview.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-media')) {
+            const index = e.target.dataset.index;
+            e.target.closest('.media-preview-item').remove();
+            
+            if (mediaPreview.children.length === 0) {
+                mediaPreview.style.display = 'none';
+                uploadPlaceholder.style.display = 'block';
+                mediaInput.value = '';
+            }
+        }
+    });
+
+    // Handle schedule options
+    const scheduleRadio = document.getElementById('schedule');
+    const scheduleOptions = document.getElementById('scheduleOptions');
+
+    scheduleRadio.addEventListener('change', function() {
+        scheduleOptions.style.display = this.checked ? 'block' : 'none';
+    });
+
+    document.getElementById('postNow').addEventListener('change', function() {
+        scheduleOptions.style.display = 'none';
+    });
+});
+</script>
+{% endblock %}

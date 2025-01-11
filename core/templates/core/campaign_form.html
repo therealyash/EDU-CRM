@@ -1,0 +1,235 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h1>{% if form.instance.pk %}Edit{% else %}Create{% endif %} Campaign</h1>
+        <div class="button-group">
+            <a href="{% url 'core:campaign_list' %}" class="btn btn-outline">Cancel</a>
+            <button type="submit" form="campaignForm" name="action" value="save_and_new" class="btn btn-secondary">Save and New</button>
+            <button type="submit" form="campaignForm" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+
+    <form id="campaignForm" method="post">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h2>Campaign Information</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}">Campaign Name</label>
+                    <div class="input-wrapper">
+                        {{ form.name }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.type.id_for_label }}">Type</label>
+                    <div class="input-wrapper">
+                        {{ form.type }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.status.id_for_label }}">Status</label>
+                    <div class="input-wrapper">
+                        {{ form.status }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.start_date.id_for_label }}">Start Date</label>
+                    <div class="input-wrapper">
+                        {{ form.start_date }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.end_date.id_for_label }}">End Date</label>
+                    <div class="input-wrapper">
+                        {{ form.end_date }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.expected_revenue.id_for_label }}">Expected Revenue</label>
+                    <div class="input-wrapper">
+                        <div class="input-with-icon">
+                            {{ form.expected_revenue }}
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.budgeted_cost.id_for_label }}">Budgeted Cost</label>
+                    <div class="input-wrapper">
+                        <div class="input-with-icon">
+                            {{ form.budgeted_cost }}
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.actual_cost.id_for_label }}">Actual Cost</label>
+                    <div class="input-wrapper">
+                        <div class="input-with-icon">
+                            {{ form.actual_cost }}
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.expected_response.id_for_label }}">Expected Response</label>
+                    <div class="input-wrapper">
+                        {{ form.expected_response }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.numbers_sent.id_for_label }}">Numbers sent</label>
+                    <div class="input-wrapper">
+                        {{ form.numbers_sent }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Description Information</h2>
+            <div class="description-group">
+                <label for="{{ form.description.id_for_label }}">Description</label>
+                <div class="input-wrapper">
+                    {{ form.description }}
+                </div>
+            </div>
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <h4>Please correct the following errors:</h4>
+            {{ form.errors }}
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 20px auto;
+        background-color: white;
+        padding: 20px 30px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .header h1 {
+        font-size: 24px;
+        font-weight: 500;
+        color: #333;
+        margin: 0;
+    }
+    .button-group {
+        display: flex;
+        gap: 10px;
+    }
+    .btn {
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        border: 1px solid transparent;
+    }
+    .btn-outline {
+        border-color: #ddd;
+        background: white;
+        color: #666;
+    }
+    .btn-secondary {
+        background: white;
+        border-color: #ddd;
+        color: #333;
+    }
+    .btn-primary {
+        background: #0d6efd;
+        color: white;
+        border: none;
+    }
+    .form-section {
+        margin-bottom: 20px;
+    }
+    .form-section h2 {
+        font-size: 18px;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 15px;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    .form-group {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 8px;
+    }
+    .form-group label {
+        flex: 0 0 140px;
+        text-align: right;
+        color: #666;
+        font-size: 14px;
+    }
+    .form-group .input-wrapper {
+        flex: 1;
+    }
+    .form-control, select, input, textarea {
+        width: 100%;
+        padding: 6px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        color: #333;
+    }
+    .input-with-icon {
+        position: relative;
+    }
+    .input-with-icon input {
+        padding-left: 25px;
+    }
+    .input-with-icon::before {
+        content: '₹';
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+    }
+    textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+    .description-group {
+        display: flex;
+        gap: 15px;
+    }
+    .description-group label {
+        flex: 0 0 140px;
+        text-align: right;
+        color: #666;
+        font-size: 14px;
+        padding-top: 8px;
+    }
+    .description-group .input-wrapper {
+        flex: 1;
+    }
+    .alert {
+        padding: 12px;
+        margin: 20px 0;
+        border-radius: 4px;
+    }
+    .alert-danger {
+        background-color: #fff3f3;
+        border: 1px solid #ffcdd2;
+        color: #d32f2f;
+    }
+</style>
+{% endblock %}

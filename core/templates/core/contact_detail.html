@@ -1,0 +1,54 @@
+{% extends 'core/base.html' %} {% block title %}{{ contact.name }} - CRM
+System{% endblock %} {% block content %}
+<div class="row">
+  <div class="col-md-8 offset-md-2">
+    <div class="card">
+      <div class="card-header">
+        <h2>Contact Details</h2>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold">Name:</div>
+          <div class="col-md-9">{{ contact.name }}</div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold">Email:</div>
+          <div class="col-md-9">{{ contact.email }}</div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold">Phone:</div>
+          <div class="col-md-9">{{ contact.phone }}</div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold">Notes:</div>
+          <div class="col-md-9">{{ contact.notes|linebreaks }}</div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold">Created:</div>
+          <div class="col-md-9">{{ contact.created_at }}</div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold">Last Updated:</div>
+          <div class="col-md-9">{{ contact.updated_at }}</div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <a
+          href="{% url 'core:contact_update' contact.id %}"
+          class="btn btn-warning"
+          >Edit</a
+        >
+        <a
+          href="{% url 'core:contact_delete' contact.id %}"
+          class="btn btn-danger"
+          onclick="return confirm('Are you sure?')"
+          >Delete</a
+        >
+        <a href="{% url 'core:contact_list' %}" class="btn btn-secondary"
+          >Back to List</a
+        >
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
