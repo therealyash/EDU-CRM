@@ -3,9 +3,15 @@
 
 {% block content %}
 <div class="container mt-4">
-    <div class="email-marketing-header mb-4">
+    <div class="email-marketing-header mb-4 d-flex justify-content-between align-items-center">
         <h1>Email Marketing</h1>
+        <div class="header-buttons">
+            <button type="button" class="btn btn-outline-secondary "><a href="{% url 'core:automate_email' %}" class="text-decoration-none text-reset">Automate Email</a></button>
+            <button type="button" class="btn btn-outline-secondary text-decoration-none"><a href="{% url 'core:email_templates' %}" class="text-decoration-none text-reset">Go to Email Templates</a>
+            </button>
+        </div>
     </div>
+    
 
     {% if messages %}
     <div class="messages">
@@ -44,20 +50,21 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="image" class="form-label">Attach Image</label>
-                        <div class="image-upload-container border-dashed p-3 text-center">
-                            <input type="file" id="image" name="image" accept="image/*" class="file-input" style="display: none;">
+                        <label for="image">Attach Image</label>
+                        <div class="image-upload-container">
+                            <input type="file" id="image" name="image" accept="image/*" class="file-input">
                             <div class="upload-placeholder" id="uploadPlaceholder">
                                 <i class="fas fa-cloud-upload-alt"></i>
                                 <span>Drag and drop an image or click to browse</span>
                             </div>
                             <div class="image-preview" id="imagePreview" style="display: none;">
-                                <img id="previewImg" src="" alt="Preview" class="img-fluid">
-                                <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" id="removeImage">&times;</button>
+                                <img id="previewImg" src="" alt="Preview">
+                                <button type="button" class="remove-image" id="removeImage">&times;</button>
                             </div>
                         </div>
                     </div>
                 </div>
+
 
                 <div class="col-md-4">
                     <div class="form-group">
@@ -96,7 +103,62 @@
         </form>
     </div>
 </div>
-
+<style>
+    .image-upload-container {
+        border: 2px dashed #ddd;
+        border-radius: 4px;
+        padding: 15px;
+        text-align: center;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    
+    .file-input {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+    
+    .upload-placeholder {
+        color: #666;
+        font-size: 13px;
+    }
+    
+    .image-preview {
+        position: relative;
+        max-width: 200px;
+        margin: 0 auto;
+    }
+    
+    .image-preview img {
+        max-width: 100%;
+        border-radius: 4px;
+    }
+    
+    .remove-image {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #ff4444;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>    
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Rich Text Editor
