@@ -35,5 +35,6 @@ urlpatterns = [
     path('whatsapp-marketing/', views.WhatsAppMarketingView.as_view(), name='whatsapp_marketing'),
     path('facebook-marketing/', views.FacebookMarketingView.as_view(), name='facebook_marketing'),
     path('email-templates/', views.email_templates, name='email_templates'),
+    path('automate-email/', views.AutomateEmailView.as_view(), name='automate_email'),
 
 ]

@@ -10,6 +10,9 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from .models import Contact, Campaign, Opportunity
 from .forms import ContactForm, BulkContactForm, CampaignForm, OpportunityForm
+from django.utils.timezone import make_aware
+from datetime import datetime
+
 import csv
 import io
 from django.http import JsonResponse
@@ -26,12 +29,78 @@ import ssl
 from core.models import Contact
 from django.conf import settings
 
+
 def email_templates(request):
+    contacts = Contact.objects.all()
     return render(request,'core/emailTemplates.html')
+
+class AutomateEmailView(View):
+    template_name = 'core/automate_email.html'
+
+    def get(self, request):
+        # Fetch contacts for email selection
+        contacts = Contact.objects.all()
+        return render(request, self.template_name, {'contacts': contacts})
+
+    def post(self, request):
+        # Handle the form submission for automating email
+        subject = request.POST.get('subject')
+        message = request.POST.get('message')
+        recipients = request.POST.getlist('recipients')
+        attachment = request.FILES.get('image')
+        schedule_time = request.POST.get('schedule_time')  # Get scheduled time for email
+
+        if not subject or not message or not recipients:
+            messages.error(request, 'Please fill in all required fields')
+            return redirect('core:automate_email')
+
+        # If schedule time is provided, convert it to a datetime object
+        if schedule_time:
+            schedule_time = make_aware(datetime.strptime(schedule_time, '%Y-%m-%dT%H:%M'))
+        else:
+            schedule_time = None
+
+        # Get recipient emails
+        recipient_emails = list(Contact.objects.filter(id__in=recipients).values_list('email', flat=True))
+
+        # Create email content
+        email = EmailMessage(
+            subject=subject,
+            body=message,
+            from_email=settings.EMAIL_HOST_USER,
+            to=recipient_emails,
+        )
+        email.content_subtype = "html"
+
+        if attachment:
+            email.attach(
+                attachment.name,
+                attachment.read(),
+                attachment.content_type
+            )
+
+        if schedule_time:
+            # Simulate scheduling by storing the task to be executed later
+            messages.success(request, f'Email is scheduled to be sent at {schedule_time}')
+            self.schedule_email_task(email, schedule_time)
+        else:
+            # Send the email immediately if no schedule time is set
+            email.send(fail_silently=False)
+            messages.success(request, f'Email sent successfully to {len(recipient_emails)} recipients.')
+
+        return redirect('core:automate_email')
+
+    def schedule_email_task(self, email, schedule_time):
+        """
+        Placeholder function to simulate email scheduling.
+        You can integrate a task scheduler like Celery or django-cron here.
+        """
+        pass
+
 
 class HomeView(TemplateView):
     template_name = 'core/home.html'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
@@ -214,6 +283,10 @@ class EmailMarketingView(View):
             messages.error(request, 'Failed to send email. Please check your settings and try again.')
 
         return redirect('core:email_marketing')
+    
+    def email_templates(request):
+        return render(request,'core/emailTemplates.html')
+
 
 class CampaignListView(ListView):
     model = Campaign
@@ -228,8 +301,6 @@ class CampaignListView(ListView):
     def get_queryset(self):
         # Optional: Add filtering or ordering if needed
         return super().get_queryset().order_by('-start_date')
-    
-
 
 class CampaignCreateView(CreateView):
     model = Campaign

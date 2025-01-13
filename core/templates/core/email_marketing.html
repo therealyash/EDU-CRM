@@ -2,13 +2,8 @@
 {% load static %}
 
 {% block content %}
-<head>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-</head>
-<div class="email-marketing-container">
-    <div class="email-marketing-header">
+<div class="container mt-4">
+    <div class="email-marketing-header mb-4">
         <h1>Email Marketing</h1>
     </div>
 
@@ -23,67 +18,67 @@
     </div>
     {% endif %}
 
-    <div class="email-form-container">
+    <div class="card p-4">
         <form method="post" enctype="multipart/form-data" id="emailForm">
             {% csrf_token %}
-            <div class="form-grid">
-                <div class="form-left-panel">
+            
+            <div class="row g-3">
+                <div class="col-md-8">
                     <div class="form-group">
-                        <label for="subject">Subject Line</label>
-                        <input type="text" id="subject" name="subject" class="form-control" required 
-                               placeholder="Enter your email subject">
+                        <label for="subject" class="form-label">Subject Line</label>
+                        <input type="text" id="subject" name="subject" class="form-control" required placeholder="Enter your email subject">
                     </div>
 
-                    <div class="form-group message-group">
-                        <label for="message">Message</label>
-                        <div class="editor-toolbar">
-                            <button type="button" class="toolbar-btn" data-command="bold">B</button>
-                            <button type="button" class="toolbar-btn" data-command="italic">I</button>
-                            <button type="button" class="toolbar-btn" data-command="underline">U</button>
-                            <button type="button" class="toolbar-btn" data-command="createLink">Link</button>
+                    <div class="form-group mt-3">
+                        <label for="message" class="form-label">Message</label>
+                        <div class="editor-toolbar mb-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-command="bold">B</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-command="italic">I</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-command="underline">U</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-command="createLink">Link</button>
                         </div>
-                        <div class="editor-container">
-                            <div id="editor" contenteditable="true" class="form-control"></div>
+                        <div class="editor-container mb-3">
+                            <div id="editor" contenteditable="true" class="form-control" style="min-height: 200px;"></div>
                             <textarea name="message" id="message" style="display: none;"></textarea>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="image">Attach Image</label>
-                        <div class="image-upload-container">
-                            <input type="file" id="image" name="image" accept="image/*" class="file-input">
+                        <label for="image" class="form-label">Attach Image</label>
+                        <div class="image-upload-container border-dashed p-3 text-center">
+                            <input type="file" id="image" name="image" accept="image/*" class="file-input" style="display: none;">
                             <div class="upload-placeholder" id="uploadPlaceholder">
                                 <i class="fas fa-cloud-upload-alt"></i>
                                 <span>Drag and drop an image or click to browse</span>
                             </div>
                             <div class="image-preview" id="imagePreview" style="display: none;">
-                                <img id="previewImg" src="" alt="Preview">
-                                <button type="button" class="remove-image" id="removeImage">&times;</button>
+                                <img id="previewImg" src="" alt="Preview" class="img-fluid">
+                                <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" id="removeImage">&times;</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="form-right-panel">
-                    <div class="form-group recipients-group">
-                        <label>Recipients</label>
-                        <div class="recipients-container">
-                            <div class="recipients-header">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="form-label">Recipients</label>
+                        <div class="recipients-container border p-3 rounded">
+                            <div class="d-flex justify-content-between mb-2">
                                 <span>Select contacts:</span>
-                                <div class="recipient-actions">
+                                <div>
                                     <button type="button" class="btn btn-outline-secondary btn-sm" id="selectAll">Select All</button>
                                     <button type="button" class="btn btn-outline-secondary btn-sm" id="clearAll">Clear All</button>
                                 </div>
                             </div>
                             <div class="recipients-list">
                                 {% for contact in contacts %}
-                                <div class="recipient-item">
-                                    <label class="checkbox-container">
+                                <div class="recipient-item d-flex align-items-center mb-2">
+                                    <label class="checkbox-container mb-0">
                                         <input type="checkbox" name="recipients" value="{{ contact.id }}">
                                         <span class="checkmark"></span>
-                                        <div class="recipient-info">
+                                        <div class="ms-2">
                                             <span class="recipient-name">{{ contact.full_name }}</span>
-                                            <span class="recipient-email">{{ contact.email }}</span>
+                                            <span class="recipient-email d-block text-muted">{{ contact.email }}</span>
                                         </div>
                                     </label>
                                 </div>
@@ -94,10 +89,7 @@
                 </div>
             </div>
 
-            <div class="form-actions">
-                <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#autoScheduleModal">
-                    Auto Schedule
-                </button>
+            <div class="form-actions d-flex justify-content-end gap-2 mt-3">
                 <button type="button" class="btn btn-outline-secondary" id="saveAsDraft">Save as Draft</button>
                 <button type="submit" class="btn btn-primary">Send Email</button>
             </div>
@@ -105,321 +97,76 @@
     </div>
 </div>
 
-<div class="header-buttons">
-    <button type="button" class="btn btn-outline-secondary">
-        <a href="{% url 'core:email_templates' %}">Select Templates</a>
-    </button>
-</div>
-<style>
-    .email-marketing-container {
-        height: calc(100vh - 60px); /* Adjust based on your navbar height */
-        margin: 0;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        background: #f8f9fa;
-    }
-    
-    .email-marketing-header {
-        margin-bottom: 20px;
-    }
-    
-    .email-marketing-header h1 {
-        font-size: 24px;
-        color: #333;
-        margin: 0;
-    }
-    
-    .email-form-container {
-        flex: 1;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        padding: 20px;
-        
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .form-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 20px;
-        flex: 1;
-        overflow: hidden;
-    }
-    
-    .form-left-panel, .form-right-panel {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        overflow: hidden;
-    }
-    
-    .form-group {
-        margin-bottom: 15px;
-    }
-    
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        color: #555;
-        font-weight: 500;
-        font-size: 14px;
-    }
-    
-    .form-control {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-    }
-    
-    .message-group {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-    
-    .editor-container {
-        flex: 1;
-        overflow: hidden;
-    }
-    
-    #editor {
-        height: 100%;
-        min-height: 200px;
-        overflow-y: auto;
-    }
-    
-    .recipients-group {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-    
-    .recipients-container {
-        flex: 1;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-    
-    .recipients-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-        padding: 0 5px;
-    }
-    
-    .recipient-actions {
-        display: flex;
-        gap: 5px;
-    }
-    
-    .recipients-list {
-        flex: 1;
-        overflow-y: auto;
-        border: 1px solid #eee;
-        border-radius: 4px;
-    }
-    
-    .recipient-item {
-        padding: 6px 10px;
-        border-bottom: 1px solid #eee;
-    }
-    
-    .recipient-item:last-child {
-        border-bottom: none;
-    }
-    
-    .checkbox-container {
-        display: flex;
-        align-items: center;
-        margin: 0;
-        cursor: pointer;
-    }
-    
-    .recipient-info {
-        margin-left: 10px;
-    }
-    
-    .recipient-name {
-        font-weight: 500;
-        margin-right: 8px;
-        font-size: 13px;
-    }
-    
-    .recipient-email {
-        color: #666;
-        font-size: 12px;
-    }
-    
-    .editor-toolbar {
-        border: 1px solid #ddd;
-        border-bottom: none;
-        border-radius: 4px 4px 0 0;
-        padding: 5px;
-        background: #f8f9fa;
-    }
-    
-    .toolbar-btn {
-        padding: 3px 6px;
-        margin-right: 3px;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 3px;
-        cursor: pointer;
-        font-size: 12px;
-    }
-    
-    .image-upload-container {
-        border: 2px dashed #ddd;
-        border-radius: 4px;
-        padding: 15px;
-        text-align: center;
-        position: relative;
-    }
-    
-    .file-input {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        opacity: 0;
-        cursor: pointer;
-    }
-    
-    .upload-placeholder {
-        color: #666;
-        font-size: 13px;
-    }
-    
-    .image-preview {
-        position: relative;
-        max-width: 200px;
-        margin: 0 auto;
-    }
-    
-    .image-preview img {
-        max-width: 100%;
-        border-radius: 4px;
-    }
-    
-    .remove-image {
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        background: #ff4444;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-        font-size: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 20px;
-        padding-top: 15px;
-        border-top: 1px solid #eee;
-    }
-    
-    .btn {
-        padding: 8px 16px;
-        border-radius: 4px;
-        font-size: 14px;
-        cursor: pointer;
-        border: 1px solid transparent;
-    }
-    
-    .btn-primary {
-        background: #0d6efd;
-        color: white;
-    }
-    
-    .btn-outline-secondary {
-        border-color: #6c757d;
-        color: #6c757d;
-        background: white;
-    }
-    
-    .btn-sm {
-        padding: 4px 8px;
-        font-size: 12px;
-    }
-</style>
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const confirmButton = document.querySelector("#confirmScheduleButton");
-    
-        confirmButton.addEventListener("click", () => {
-          const date = document.querySelector("#scheduleDate").value;
-          const time = document.querySelector("#scheduleTime").value;
-    
-          if (date && time) {
-            // Get the modal element and close it
-            const modalElement = document.querySelector("#autoScheduleModal");
-            const modal = bootstrap.Modal.getInstance(modalElement);
-            modal.hide();
-    
-            // Remove modal backdrop if it persists
-            const backdrop = document.querySelector(".modal-backdrop");
-            if (backdrop) {
-              backdrop.remove();
-            }
-    
-            // Display selected date and time in a new popup
-            alert(`Email Scheduled for:\nDate: ${date}\nTime: ${time}`);
-          } else {
-            alert("Please select both date and time before confirming.");
-          }
-        });
-      });
-</script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Rich Text Editor
+    const editor = document.getElementById('editor');
+    const message = document.getElementById('message');
+    const form = document.getElementById('emailForm');
 
-<!-- Modal -->
-<div class="modal fade" id="autoScheduleModal" tabindex="-1" aria-labelledby="autoScheduleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="autoScheduleModalLabel">Auto Schedule Email</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p>Would you like to auto-schedule this email for a predefined time?</p>
-          <form id="scheduleForm">
-            <div class="mb-3">
-              <label for="scheduleDate" class="form-label">Select Date</label>
-              <input type="date" id="scheduleDate" name="scheduleDate" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label for="scheduleTime" class="form-label">Select Time</label>
-              <input type="time" id="scheduleTime" name="scheduleTime" class="form-control" required>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" id="confirmScheduleButton">Confirm</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  
+    // Update hidden textarea before form submission
+    form.addEventListener('submit', function() {
+        message.value = editor.innerHTML;
+    });
+
+    // Toolbar functionality
+    document.querySelectorAll('.editor-toolbar .btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            const command = this.dataset.command;
+            if (command === 'createLink') {
+                const url = prompt('Enter the URL:');
+                if (url) document.execCommand(command, false, url);
+            } else {
+                document.execCommand(command, false, null);
+            }
+            editor.focus();
+        });
+    });
+
+    // Image Upload Preview
+    const imageInput = document.getElementById('image');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const removeImage = document.getElementById('removeImage');
+
+    imageInput.addEventListener('change', function(e) {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                imagePreview.style.display = 'block';
+                uploadPlaceholder.style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    removeImage.addEventListener('click', function() {
+        imageInput.value = '';
+        imagePreview.style.display = 'none';
+        uploadPlaceholder.style.display = 'block';
+    });
+
+    // Recipients Selection
+    const selectAll = document.getElementById('selectAll');
+    const clearAll = document.getElementById('clearAll');
+    const checkboxes = document.querySelectorAll('input[name="recipients"]');
+
+    selectAll.addEventListener('click', function() {
+        checkboxes.forEach(checkbox => checkbox.checked = true);
+    });
+
+    clearAll.addEventListener('click', function() {
+        checkboxes.forEach(checkbox => checkbox.checked = false);
+    });
+
+    // Save as Draft functionality
+    document.getElementById('saveAsDraft').addEventListener('click', function() {
+        // Implement draft saving logic here
+        alert('Draft saved successfully!');
+    });
+});
+</script>
 {% endblock %}
