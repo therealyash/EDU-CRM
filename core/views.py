@@ -12,7 +12,7 @@ from .models import Contact, Campaign, Opportunity
 from .forms import ContactForm, BulkContactForm, CampaignForm, OpportunityForm
 from django.utils.timezone import make_aware
 from datetime import datetime
-
+import time
 import csv
 import io
 from django.http import JsonResponse
@@ -23,16 +23,46 @@ from django.db.models.functions import TruncMonth
 from django.views import View
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.core.mail import EmailMessage
 import smtplib
 import ssl
+from email.message import EmailMessage
+from django.core.mail import send_mail
 from core.models import Contact
 from django.conf import settings
-
+from background_task import background
+import logging
 
 def email_templates(request):
     contacts = Contact.objects.all()
     return render(request,'core/emailTemplates.html')
+
+#@background(schedule=0)
+def schedule_email_task(schedule_date,schedule_time,subject, message, recipient_emails,sender_email):
+        send_datetime_str = f"{schedule_date} {schedule_time}"
+        send_datetime = datetime.strptime(send_datetime_str, "%Y-%m-%d %H:%M:%S")
+        """Background task for scheduled emails"""
+
+        while True:
+            current_time = datetime.now()
+            if current_time >= send_datetime:
+                send_email(subject, message, recipient_emails,sender_email)
+                break
+            time.sleep(30)
+
+def send_email(subject, message, recipient_email,sender_email):
+        """Send email using SMTP"""
+        em = EmailMessage()
+        print("----------")
+        em['From'] = sender_email
+        em['To'] =recipient_email
+        em['Subject'] = subject
+        em.set_content(message)
+
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+            smtp.login(sender_email,'mvfr koeq nkwn kisd')
+            smtp.sendmail(sender_email, recipient_email, em.as_string())
+
 
 class AutomateEmailView(View):
     template_name = 'core/automate_email.html'
@@ -42,60 +72,65 @@ class AutomateEmailView(View):
         contacts = Contact.objects.all()
         return render(request, self.template_name, {'contacts': contacts})
 
-    def post(self, request):
-        # Handle the form submission for automating email
+    def post(self, request, *args, **kwargs):
+            # Get form data
         subject = request.POST.get('subject')
         message = request.POST.get('message')
         recipients = request.POST.getlist('recipients')
         attachment = request.FILES.get('image')
-        schedule_time = request.POST.get('schedule_time')  # Get scheduled time for email
+        scheduled_time = request.POST.get('schedule_time')
+        parsed_datetime = datetime.fromisoformat(scheduled_time)
+        # Extract date and time in the desired formats
+        schedule_date = parsed_datetime.date().isoformat()  # '2025-01-17'
+        schedule_time = parsed_datetime.time().strftime("%H:%M:%S")  # '15:54:00'
+        print(schedule_time)
+        print(schedule_date)
+        '''schedule_date = "2025-01-17"  # YYYY-MM-DD
+        schedule_time = "15:54:00"'''
+        sender_email = 'varadpathak011@gmail.com'
+        password = 'mvfr koeq nkwn kisd'
 
-        if not subject or not message or not recipients:
+
+            # Validate required fields
+        if not all([subject, message, recipients]):
             messages.error(request, 'Please fill in all required fields')
             return redirect('core:automate_email')
 
-        # If schedule time is provided, convert it to a datetime object
-        if schedule_time:
-            schedule_time = make_aware(datetime.strptime(schedule_time, '%Y-%m-%dT%H:%M'))
+            # Get recipient emails
+        recipient_emails = list(Contact.objects.filter(
+            id__in=recipients).values_list('email', flat=True))
+
+        if not recipient_emails:
+            messages.error(request, 'No valid recipients found')
+            return redirect('core:automate_email')
+
+            # Handle scheduled emails
+        if scheduled_time:
+            try:
+                schedule_datetime = make_aware(
+                    datetime.strptime(scheduled_time, '%Y-%m-%dT%H:%M'))
+                    
+                '''if schedule_datetime <= make_aware(datetime.now()):
+                    messages.error(request, 'Schedule time must be in the future')
+                    return redirect('core:automate_email')'''
+                    
+                schedule_email_task(schedule_date,schedule_time,subject, message, recipient_emails,sender_email)
+                messages.success(
+                    request, f'Email scheduled for {schedule_datetime}')
+            except ValueError:
+                messages.error(request, 'Invalid schedule time format')
+                return redirect('core:automate_email')
         else:
-            schedule_time = None
-
-        # Get recipient emails
-        recipient_emails = list(Contact.objects.filter(id__in=recipients).values_list('email', flat=True))
-
-        # Create email content
-        email = EmailMessage(
-            subject=subject,
-            body=message,
-            from_email=settings.EMAIL_HOST_USER,
-            to=recipient_emails,
-        )
-        email.content_subtype = "html"
-
-        if attachment:
-            email.attach(
-                attachment.name,
-                attachment.read(),
-                attachment.content_type
-            )
-
-        if schedule_time:
-            # Simulate scheduling by storing the task to be executed later
-            messages.success(request, f'Email is scheduled to be sent at {schedule_time}')
-            self.schedule_email_task(email, schedule_time)
-        else:
-            # Send the email immediately if no schedule time is set
-            email.send(fail_silently=False)
-            messages.success(request, f'Email sent successfully to {len(recipient_emails)} recipients.')
+                # Send immediately
+            send_email(subject, message, recipient_emails,sender_email)
+            messages.success(
+                request, f'Email sent successfully to {len(recipient_emails)} recipients')
 
         return redirect('core:automate_email')
+    
 
-    def schedule_email_task(self, email, schedule_time):
-        """
-        Placeholder function to simulate email scheduling.
-        You can integrate a task scheduler like Celery or django-cron here.
-        """
-        pass
+    #@background(schedule=60)
+    
 
 
 class HomeView(TemplateView):
@@ -516,3 +551,22 @@ def update_campaign_cost(request, campaign_id):
         'success': False,
         'error': 'Method not allowed'
     }, status=405)
+
+
+
+    '''  # Create email content
+        email = EmailMessage(
+            subject=subject,
+            body=message,
+            from_email=settings.EMAIL_HOST_USER,
+            to=recipient_emails,
+        )
+        email.content_subtype = "html"
+
+        if attachment:
+            email.attach(
+                attachment.name,
+                attachment.read(),
+                attachment.content_type
+            )
+'''

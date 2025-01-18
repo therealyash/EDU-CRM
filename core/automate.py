@@ -4,10 +4,12 @@ import smtplib
 import time
 from datetime import datetime
 
+
+
 # Email Details -
-sender_email = 'codetesting.yash@gmail.com'
-password = ''
-receiver_email = 'yash10@hotmail.com'
+sender_email = 'varadpathak011@gmail.com'
+password = 'mvfr koeq nkwn kisd'
+receiver_email = 'varadpathak007@gmail.com'
 subject = 'Email Automation with Timing & Date'
 body = """
 Hello Varad,
@@ -46,5 +48,7 @@ def schedule_email(send_date, send_time):
             break
         time.sleep(30)
 
-
+schedule_date = "2025-01-17"  # YYYY-MM-DD
+schedule_time = "02:16:00"    # HH:MM:SS
+schedule_email(schedule_date, schedule_time)
 
