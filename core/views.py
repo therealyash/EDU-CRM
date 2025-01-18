@@ -36,8 +36,9 @@ def email_templates(request):
     contacts = Contact.objects.all()
     return render(request,'core/emailTemplates.html')
 
-#@background(schedule=0)
+@background(schedule=1)
 def schedule_email_task(schedule_date,schedule_time,subject, message, recipient_emails,sender_email):
+        print("Schedule view")
         send_datetime_str = f"{schedule_date} {schedule_time}"
         send_datetime = datetime.strptime(send_datetime_str, "%Y-%m-%d %H:%M:%S")
         """Background task for scheduled emails"""
@@ -47,7 +48,7 @@ def schedule_email_task(schedule_date,schedule_time,subject, message, recipient_
             if current_time >= send_datetime:
                 send_email(subject, message, recipient_emails,sender_email)
                 break
-            time.sleep(30)
+            #time.sleep(30)
 
 def send_email(subject, message, recipient_email,sender_email):
         """Send email using SMTP"""
