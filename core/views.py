@@ -32,12 +32,23 @@ from django.conf import settings
 from background_task import background
 import logging
 
+import base64
+from io import BytesIO
 def email_templates(request):
     contacts = Contact.objects.all()
     return render(request,'core/emailTemplates.html')
 
+def serialize_attachment(attachment):
+    attachment_content = attachment.read()  # Read the file content
+    return base64.b64encode(attachment_content).decode('utf-8')  # Base64 encode and return as string
+
+# Deserialize the file (convert back to file object)
+def deserialize_attachment(base64_content, attachment_name):
+    attachment_content = base64.b64decode(base64_content)  # Decode base64 back to binary data
+    return BytesIO(attachment_content)  # Return as a BytesIO object
+
 @background(schedule=1)
-def schedule_email_task(schedule_date,schedule_time,subject, message, recipient_emails,sender_email):
+def schedule_email_task(schedule_date,schedule_time,subject, message, recipient_emails,sender_email, attachment_base64, attachment_name):
         print("Schedule view")
         send_datetime_str = f"{schedule_date} {schedule_time}"
         send_datetime = datetime.strptime(send_datetime_str, "%Y-%m-%d %H:%M:%S")
@@ -46,11 +57,11 @@ def schedule_email_task(schedule_date,schedule_time,subject, message, recipient_
         while True:
             current_time = datetime.now()
             if current_time >= send_datetime:
-                send_email(subject, message, recipient_emails,sender_email)
+                send_email(subject, message, recipient_emails,sender_email, attachment_base64, attachment_name)
                 break
             #time.sleep(30)
 
-def send_email(subject, message, recipient_email,sender_email):
+def send_email(subject, message, recipient_email,sender_email, attachment_base64, attachment_name):
         """Send email using SMTP"""
         em = EmailMessage()
         print("----------")
@@ -58,6 +69,15 @@ def send_email(subject, message, recipient_email,sender_email):
         em['To'] =recipient_email
         em['Subject'] = subject
         em.set_content(message)
+
+        if attachment_base64 and attachment_name:
+            attachment = deserialize_attachment(attachment_base64, attachment_name)
+            em.add_attachment(
+            attachment.read(),
+            filename=attachment_name,
+            maintype='application',  # Default MIME type
+            subtype='octet-stream'
+        )
 
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
@@ -91,7 +111,11 @@ class AutomateEmailView(View):
         sender_email = 'varadpathak011@gmail.com'
         password = 'mvfr koeq nkwn kisd'
 
-
+        attachment_base64 = None
+        attachment_name = None
+        if attachment:
+            attachment_base64 = serialize_attachment(attachment)  # Serialize the file
+            attachment_name = attachment.name  # Get the attachment name
             # Validate required fields
         if not all([subject, message, recipients]):
             messages.error(request, 'Please fill in all required fields')
@@ -115,7 +139,7 @@ class AutomateEmailView(View):
                     messages.error(request, 'Schedule time must be in the future')
                     return redirect('core:automate_email')
                     
-                schedule_email_task(schedule_date,schedule_time,subject, message, recipient_emails,sender_email)
+                schedule_email_task(schedule_date,schedule_time,subject, message, recipient_emails,sender_email, attachment_base64, attachment_name)
                 messages.success(
                     request, f'Email scheduled for {schedule_datetime}')
             except ValueError:
@@ -123,7 +147,7 @@ class AutomateEmailView(View):
                 return redirect('core:automate_email')
         else:
                 # Send immediately
-            send_email(subject, message, recipient_emails,sender_email)
+            send_email(subject, message, recipient_emails,sender_email, attachment_base64, attachment_name)
             messages.success(
                 request, f'Email sent successfully to {len(recipient_emails)} recipients')
 
