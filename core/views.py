@@ -110,9 +110,9 @@ class AutomateEmailView(View):
                 schedule_datetime = make_aware(
                     datetime.strptime(scheduled_time, '%Y-%m-%dT%H:%M'))
                     
-                '''if schedule_datetime <= make_aware(datetime.now()):
+                if schedule_datetime <= make_aware(datetime.now()):
                     messages.error(request, 'Schedule time must be in the future')
-                    return redirect('core:automate_email')'''
+                    return redirect('core:automate_email')
                     
                 schedule_email_task(schedule_date,schedule_time,subject, message, recipient_emails,sender_email)
                 messages.success(
