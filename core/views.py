@@ -11,7 +11,7 @@ from django.urls import reverse_lazy
 from .models import Contact, Campaign, Opportunity
 from .forms import ContactForm, BulkContactForm, CampaignForm, OpportunityForm
 from django.utils.timezone import make_aware
-from datetime import datetime
+from datetime import datetime,timedelta
 import time
 import csv
 import io
@@ -31,9 +31,43 @@ from core.models import Contact
 from django.conf import settings
 from background_task import background
 import logging
-
 import base64
 from io import BytesIO
+
+import pywhatkit as kit
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+def send_whatsapp_message(request):
+    print("Entered")
+    message ="WhatsApp Automation Testing"
+    contacts =["+917620169727"]# List of phone numbers in international format
+    print(contacts)
+
+    if not message or not contacts:
+        messages.error(request, 'Fill Details')
+        return redirect('core:whatsapp_marketing')
+
+    try:
+        for contact in contacts:
+            # Calculate a time 1 minute in the future
+            future_time = datetime.now() + timedelta(minutes=1)
+
+            kit.sendwhatmsg_instantly(
+                phone_no=contact,
+                message=message,
+                wait_time=10,  # Time to wait before sending in seconds
+                tab_close=True  # Automatically close the browser tab
+            )
+        print("Executed")
+        messages.success(request, f'Message sent successfully to {len(contacts)} contacts')
+    except Exception as e:
+        print(f"Error: {e}")
+        messages.error(request, f"Failed to send message: {str(e)}")
+
+    return redirect('core:whatsapp_marketing')
+
+
 def email_templates(request):
     contacts = Contact.objects.all()
     return render(request,'core/emailTemplates.html')

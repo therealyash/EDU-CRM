@@ -9,7 +9,7 @@
     </div>
 
     <div class="whatsapp-form-container">
-        <form method="post" enctype="multipart/form-data" id="whatsappForm">
+        <form method="post" action="{% url 'core:send_whatsapp_message' %}" enctype="multipart/form-data" id="whatsappForm">
             {% csrf_token %}
             
             <div class="form-grid">
@@ -62,7 +62,7 @@
                                 {% for contact in contacts %}
                                 <div class="recipient-item">
                                     <label class="checkbox-container">
-                                        <input type="checkbox" name="recipients" value="{{ contact.id }}">
+                                        <input type="checkbox" name="recipients" value="{{ contact.phone }}">
                                         <span class="checkmark"></span>
                                         <div class="recipient-info">
                                             <span class="recipient-name">{{ contact.name }}</span>
